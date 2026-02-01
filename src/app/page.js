@@ -18,7 +18,7 @@ export default function Home() {
               href="/auth"
               className="px-6 py-3 border border-blue-600 text-blue-600 font-semibold rounded-md hover:bg-blue-50 dark:hover:bg-gray-900 transition-colors"
             >
-              Login with Google
+              Login
             </a>
           </div>
         </div>

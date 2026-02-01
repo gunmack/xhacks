@@ -47,8 +47,7 @@ export default function Login() {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
+      const uid = result.user.uid;
       router.push("/feed"); // Redirect to a protected page
     } catch (err) {
       console.error("Error signing in with Google:", err.message);
@@ -181,7 +180,11 @@ export default function Login() {
             </div>
           )}
 
-          {popup && <p>A Google popup has opened to help you log in...</p>}
+          {popup && (
+            <p className="text-black">
+              A Google popup has opened to help you log in...
+            </p>
+          )}
         </div>
       </div>
     </div>
