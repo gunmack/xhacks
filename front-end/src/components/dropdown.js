@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { signOut } from "firebase/auth";
-import { auth } from "../firebase_config";
+import { getFirebaseAuth } from "../firebase_config";
 import { useRouter } from "next/navigation";
 
 export default function DropdownMenu() {
@@ -28,6 +28,7 @@ export default function DropdownMenu() {
 
   const handleSignOut = async () => {
     try {
+      const auth = getFirebaseAuth();
       await signOut(auth);
       router.push("/"); // Redirect to the login page
     } catch (error) {
@@ -41,7 +42,7 @@ export default function DropdownMenu() {
       {/* Hamburger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex flex-col justify-between w-8 h-8 p-1 mb-8"
+        className="cursor-pointer flex flex-col justify-between w-8 h-8 p-1 mb-8"
       >
         <span className="block h-1 bg-white" />
         <span className="block h-1 bg-white" />
@@ -60,7 +61,7 @@ export default function DropdownMenu() {
               {item.action === "logout" ? (
                 <button
                   onClick={handleSignOut}
-                  className="w-full text-left px-4 py-2 text-black hover:bg-gray-100"
+                  className="cursor-pointer w-full text-left px-4 py-2 text-black hover:bg-gray-100"
                 >
                   {item.label}
                 </button>
@@ -68,7 +69,7 @@ export default function DropdownMenu() {
                 <a
                   href={item.href}
                   onClick={() => setIsOpen(false)}
-                  className="block px-4 py-2 text-black hover:bg-gray-100"
+                  className="cursor-pointer block px-4 py-2 text-black hover:bg-gray-100"
                 >
                   {item.label}
                 </a>
