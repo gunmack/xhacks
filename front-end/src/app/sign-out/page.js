@@ -1,28 +1,20 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { signOut } from "firebase/auth";
-import { auth } from "../../firebase_config";
 import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { getFirebaseAuth } from "../../firebase_config";
 
-export default function SignOut() {
+export default function SignOutPage() {
   const router = useRouter();
+  const auth = getFirebaseAuth();
 
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
     try {
       await signOut(auth);
-      router.push("/"); // or "/"
-    } catch (error) {
-      console.error("Logout failed:", error);
-      alert(`Error signing out: ${error.message}`);
+      router.push("/auth");
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  return (
-    <button
-      onClick={handleLogout}
-      className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-    >
-      Log out
-    </button>
-  );
+  return <button onClick={handleSignOut}>Sign Out</button>;
 }

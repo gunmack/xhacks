@@ -1,8 +1,5 @@
-/**
- * Login page component
- */
-
 "use client";
+
 import React, { useState, useEffect } from "react";
 import {
   signInWithPopup,
@@ -11,181 +8,143 @@ import {
   signInAnonymously,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { auth } from "../../firebase_config";
-
+import { getFirebaseAuth } from "../../firebase_client"; // client-only Firebase
 import { useRouter } from "next/navigation";
 
-export default function Login() {
+export default function AuthPage() {
   const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
-  const [popup, setPopup] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [popupOpen, setPopupOpen] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.displayName != null) {
-        router.push("/feed"); // replace avoids back-button issues
+    const auth = getFirebaseAuth();
+    if (!auth) return; // skip SSR
+
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        router.push("/feed");
       } else {
-        setCheckingAuth(false); // user not signed in → show form
+        setLoading(false);
       }
+      setUser(currentUser);
     });
 
     return () => unsubscribe();
   }, [router]);
-  if (checkingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Checking authentication...</p>
-      </div>
-    );
-  }
 
   const handleGoogleSignIn = async () => {
-    setPopup(true);
-    const provider = new GoogleAuthProvider();
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+
+    setPopupOpen(true);
     try {
-      const result = await signInWithPopup(auth, provider);
-      const uid = result.user.uid;
-      router.push("/feed"); // Redirect to a protected page
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      router.push("/feed");
     } catch (err) {
-      console.error("Error signing in with Google:", err.message);
-      setMsg("Error signing in with Google, please try again.");
+      console.error("Google sign-in error:", err);
+      setMsg("Error signing in with Google. Try again.");
     }
-    setPopup(false);
+    setPopupOpen(false);
   };
 
-  const handleLogin = async (email, password) => {
+  const handleEmailLogin = async () => {
     if (!email || !password) {
-      alert("Please enter your email and password.");
-    } else {
-      try {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        const user = result.user;
+      setMsg("Enter both email and password.");
+      return;
+    }
+    const auth = getFirebaseAuth();
+    if (!auth) return;
 
-        router.push("/main-menu"); // Redirect to a protected page
-      } catch (error) {
-        // console.error('Error signing in:', error.message);
-        setMsg(`An error occured, please try again.`);
-        if (error.code === "auth/invalid-credential") {
-          setMsg("Incorrect email or password. Please try again.");
-        } else {
-          setMsg(`An error occured, please try again.`);
-        }
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/feed");
+    } catch (err) {
+      console.error("Email sign-in error:", err);
+      if (
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/user-not-found"
+      ) {
+        setMsg("Incorrect email or password.");
+      } else {
+        setMsg("Login failed. Try again.");
       }
     }
   };
 
   const handleGuestLogin = async () => {
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+
     try {
       await signInAnonymously(auth);
-      router.push("/feed"); // Redirect after signing in as guest
-    } catch (error) {
-      console.error("Error during guest login:", error.message);
+      router.push("/feed");
+    } catch (err) {
+      console.error("Guest login error:", err);
+      setMsg("Failed to log in as guest. Try again.");
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-gray-500">Checking authentication...</p>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className="relative min-h-screen flex justify-center items-center p-8 sm:p-20 bg-gradient-to-r"
-      data-testid="Login screen"
-    >
-      <div className="bg-white w-full max-w-3xl shadow-md rounded-lg p-8">
-        {/* <strong className="text-center text-black block mb-6 text-2xl">
+    <div className="min-h-screen flex items-center justify-center p-8 sm:p-20 bg-zinc-50 dark:bg-black">
+      <div className="bg-white w-full max-w-md shadow-md rounded-lg p-8 dark:bg-gray-900">
+        <h1 className="text-2xl font-bold text-center mb-6 text-black dark:text-white">
           Sign In
-        </strong> */}
-        <p className="text-center block mb-2 text-l">
-          {/* Signing in allows you to unlock the full potential of QuizLing. By
-          signing in, you can track your linguistic progress over time, set
-          personalized goals, and enjoy full access to our achievements feature. */}
-        </p>
+        </h1>
 
-        <div className="text-center">
-          {msg && <h2 className="mb-4 text-red-500">{msg}</h2>}
-          <br />
-          {!popup && (
-            <div>
-              <div className="flex flex-col gap-4 bg-gray-100 p-8 rounded-lg">
-                {/* <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-gray-600 text-sm mb-2"
-                  ></label>
-                  <input
-                    type="text"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="md:w-1/2 w-full p-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-[#5999AE]"
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-gray-600 text-sm mb-2"
-                  ></label>
-                  <input
-                    type="text"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="md:w-1/2 w-full p-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-[#5999AE]"
-                    placeholder="Enter your password"
-                    required
-                  />
-                </div> */}
-                <div className="flex flex-row gap-4 pt-4 justify-center items-center">
-                  {/* <button
-                    onClick={() => handleLogin(email, password)}
-                    className="bg-black p-1 md:w-5/12 w-full rounded-lg hover:bg-gray-700 text-white"
-                  >
-                    Login
-                  </button> */}
+        {msg && <p className="mb-4 text-red-500 text-center">{msg}</p>}
 
-                  <button
-                    className="bg-black p-2.5 rounded-lg hover:bg-gray-700 text-white flex items-center justify-center"
-                    onClick={handleGoogleSignIn}
-                  >
-                    Login with Google
-                  </button>
-                </div>
-              </div>
-              {/* <div className="p-8">
-                <p className="text-sm text-gray-500 mt-4">
-                  Don’t have an account?
-                  <button
-                    className=" p-2  text-blue-600 hover:underline "
-                    onClick={handleGuestLogin}
-                  >
-                    Continue as Guest
-                  </button>
-                  or{" "}
-                  <Link
-                    href="/sign-up"
-                    className="text-blue-600 hover:underline"
-                  >
-                    Sign up
-                  </Link>
-                </p>
-                <p className="text-sm text-gray-500 mt-4">
-                  Forgot your password?{" "}
-                  <Link href="/reset" className="text-blue-600 hover:underline">
-                    Reset password
-                  </Link>
-                </p>
-              </div> */}
-            </div>
-          )}
+        {/* Email/password login */}
+        {/* <div className="flex flex-col gap-4 mb-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+          />
+          <button
+            onClick={handleEmailLogin}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg"
+          >
+            Log In
+          </button>
+        </div> */}
 
-          {popup && (
-            <p className="text-black">
-              A Google popup has opened to help you log in...
-            </p>
-          )}
-        </div>
+        {/* Google sign-in */}
+        <button
+          onClick={handleGoogleSignIn}
+          className="cursor-pointer w-full bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg mb-4 flex justify-center items-center hover:pointer"
+        >
+          {popupOpen ? "Opening Google popup..." : "Sign in with Google"}
+        </button>
+
+        {/* Guest login */}
+        {/* <button
+          onClick={handleGuestLogin}
+          className="w-full border border-gray-500 hover:bg-gray-100 p-2 rounded-lg text-black dark:text-white"
+        >
+          Continue as Guest
+        </button> */}
       </div>
     </div>
   );
