@@ -17,17 +17,16 @@ app = FastAPI(
 async def read_root():
     return {"message": "steeeeeeeeeeeeeeeeewen"}
 
-from fastapi import Request
+from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
 import sqlalchemy
 
-@app.get("/test/{username}")
+@app.get("/get_user")
 async def get_user(
     request: Request,
     db_session: database.DBSession,
     username: str
 ):
-    print(username)
     res = await db_session.scalar(
         sqlalchemy.select(BedrockUser)
         .where(BedrockUser.username == username)
@@ -35,6 +34,43 @@ async def get_user(
 
     return JSONResponse(res.to_dict())
 
+@app.post("/create_user")
+async def create_user(
+    request: Request,
+    db_session: database.DBSession,
+    username: str,
+    email: str,
+    u_token: str
+):
+    if username is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username cannot be of length zero!"
+        )
+    if email is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email cannot be of length zero!"
+        )
+    if u_token is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token cannot be of length zero!"
+        )
+    
+    db_session.add(BedrockUser(
+        username=username,
+        email=email,
+        u_token=u_token
+    ))
+
+    await db_session.commit()
+
+    res = await db_session.scalar(
+        sqlalchemy.select(BedrockUser)
+        .where(BedrockUser.username == username)
+    )
+    return JSONResponse(res.to_dict())
 
 from database import Base
 from sqlalchemy import (
