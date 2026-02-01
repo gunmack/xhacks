@@ -145,6 +145,7 @@ class BedrockNote(Base):
     __tablename__ = "bedrock_note"
 
     n_id = Column(Integer, primary_key=True)
+    n_data = Column(String(65535))
 
     def to_dict(self) -> dict:
         return {
@@ -154,7 +155,6 @@ class BedrockNote(Base):
 class BedrockUserNote(BedrockNote):
     n_type = mapped_column(String(50), default='USER', use_existing_column=True)
     n_owner = mapped_column(ForeignKey("bedrock_user.username"), use_existing_column=True)
-    n_data = mapped_column(String(65535), use_existing_column=True)
 
     def to_dict(self) -> dict:
         return {
@@ -167,8 +167,6 @@ class BedrockUserNote(BedrockNote):
 class BedrockFamilyNote(BedrockNote):
     n_type = mapped_column(String(50), default='FAMILY', use_existing_column=True)
     n_owner = mapped_column(ForeignKey("bedrock_family.f_id"), use_existing_column=True)
-    n_data = mapped_column(String(65535), use_existing_column=True)
-
     def to_dict(self) -> dict:
         return {
             "n_id" : BedrockNote.n_id,
