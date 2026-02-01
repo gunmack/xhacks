@@ -25,13 +25,32 @@ import sqlalchemy
 async def get_user(
     request: Request,
     db_session: database.DBSession,
-    username: str
+    email: str | None = None,
+    username: str | None = None,
+    u_token: str | None = None
 ):
-    res = await db_session.scalar(
-        sqlalchemy.select(BedrockUser)
-        .where(BedrockUser.username == username)
-    )
+    res = None
+    if email is not None:
+        res = await db_session.scalar(
+            sqlalchemy.select(BedrockUser)
+            .where(BedrockUser.email == email)
+        )
+    if username is not None:
+        res = await db_session.scalar(
+            sqlalchemy.select(BedrockUser)
+            .where(BedrockUser.username == username)
+        )
+    if u_token is not None:
+        res = await db_session.scalar(
+            sqlalchemy.select(BedrockUser)
+            .where(BedrockUser.u_token == u_token)
+        )
 
+    if res is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Could not find user!"
+        )
     return JSONResponse(res.to_dict())
 
 @app.post("/create_user")
