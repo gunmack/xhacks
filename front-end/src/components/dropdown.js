@@ -8,6 +8,7 @@ import { useRouter, usePathname } from "next/navigation";
 export default function DropdownMenu() {
   const items = [
     { label: "Feed", href: "/feed" },
+    { label: "Library", href: "/library" },
     { label: "Profile", href: "/profile" },
     { label: "Settings", href: "/settings" },
     { label: "Sign Out", action: "logout" },

@@ -44,10 +44,35 @@ export default function AddModal({ open, onClose, onSubmit }) {
               id="date"
               name="date"
               className="ml-2 px-3 py-2 border text-black rounded-lg"
-              required
             />
           </div>
-          <div className="flex justify-end">
+          <div className="mt-4 justify-between flex">
+            <div>
+              <input
+                type="radio"
+                id="autoCatergorize"
+                name="autoCatergorize"
+                value="true"
+                className="ml-2 px-3 py-2 border text-black rounded-lg"
+              />
+              <label htmlFor="autoCatergorize" className="ml-2 text-black ">
+                Auto catergorize
+              </label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                id="visibility"
+                name="visibility"
+                value="private"
+                className="ml-2 px-3 py-2 border text-black rounded-lg"
+              />
+              <label htmlFor="visibilityPrivate" className="ml-2 text-black ">
+                Private
+              </label>
+            </div>
+          </div>
+          <div className="flex justify-end mt-4">
             <button
               type="button"
               className="mr-4 px-4 py-2 bg-red-400 rounded-lg cursor-pointer hover:bg-red-600 text-white"
