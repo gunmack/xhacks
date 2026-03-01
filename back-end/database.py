@@ -30,8 +30,9 @@ class DatabaseSessionManager:
         ###
         # Can't call asyncio.run() because 
         # Render/Uvicorn already runs inside an asyncio event loop
-        # if check_db:
-        #     asyncio.run(DatabaseSessionManager.test_connection(db_url))
+        # Checking if it deploys 
+        if check_db:
+            asyncio.run(DatabaseSessionManager.test_connection(db_url))
         ###
         
         

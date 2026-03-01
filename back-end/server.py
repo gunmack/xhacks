@@ -5,10 +5,11 @@ import database
 
 logging.basicConfig(level=logging.DEBUG)
 
-###
-## GPT suggests removal of line below
+##
+# GPT suggests removal of line below
+# But not required for successful deployment
 database.setup()
-###
+
 
 app = FastAPI(
     lifespan=database.lifespan,
