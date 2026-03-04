@@ -7,6 +7,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 // import events from "react-big-calendar/lib/events";
 // import * as dates from "react-big-calendar/lib/src/utils/dates";
 
+
 const mLocalizer = momentLocalizer(moment);
 
 const events = [
@@ -22,16 +23,18 @@ const events = [
   },
 ];
 
+
 export default function Feed() {
   return (
-    <div className="flex min-h-screen items-center justify-center ">
-      <Calendar
+    <main className="flex w-full flex-col items-center justify-center  ">
+     <Calendar
         localizer={mLocalizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
         style={{ height: 500, width: "80%" }}
       />
-    </div>
+    </main>
+
   );
 }
